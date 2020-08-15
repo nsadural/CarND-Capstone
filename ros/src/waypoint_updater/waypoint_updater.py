@@ -1,8 +1,9 @@
 #!/usr/bin/env python
-
+import numpy as np
 import rospy
 from geometry_msgs.msg import PoseStamped
 from styx_msgs.msg import Lane, Waypoint
+from scipy.spatial import KDTree
 
 import math
 
@@ -38,23 +39,55 @@ class WaypointUpdater(object):
 
         # TODO: Add other member variables you need below
         self.pose = None
+        self.base_waypoints = None
+        self.waypoints_2d = None
+        self.waypoints_kdtree = None
         
-        rospy.spin()
+        self.loop()
 
-    def loop():
-        rate = rospy.Rate(50) // 50 Hz
+    def loop(self):
+        rate = rospy.Rate(50) # 50 Hz
         while not rospy.is_shutdown():
-            msg = Float64()
-            msg.data = read_temperature_sensor_data()
-            self.final_waypoints_pub.publish(msg)
+            if self.pose and self.base_waypoints and self.waypoints_2d and self.waypoints_kdtree:
+                final_waypoints = self.get_final_waypoints()
+                self.final_waypoints_pub.publish(final_waypoints)
             rate.sleep()
+            
+    def get_final_waypoints(self):
+        x = self.pose.pose.position.x
+        y = self.pose.pose.position.y
+        
+        closest_waypoint_index = self.waypoints_kdtree.query([x, y])[1]
+        
+        # check that closest waypoint is infront of vehicle
+        closest_waypoint = self.waypoints_2d[closest_waypoint_index]
+        prev_waypoint = self.waypoints_2d[closest_waypoint_index - 1]
+         
+        if not self.is_waypoint_infront(closest_waypoint, prev_waypoint, [x, y]):
+            closest_waypoint_index = (closest_waypoint_index + 1) % len(self.waypoints_2d)
+        
+        lane = Lane()
+        lane.header = self.base_waypoints.header
+        lane.waypoints = self.base_waypoints.waypoints[closest_waypoint_index:closest_waypoint_index + LOOKAHEAD_WPS]
+        return lane
+   
+    def is_waypoint_infront(self, waypoint, prev_waypoint, position):
+        waypoint_vect = np.array(waypoint)
+        prev_waypoint_vect = np.array(prev_waypoint)
+        position_vect = np.array(position)
+        
+        dotproduct = np.dot(waypoint_vect - prev_waypoint_vect, waypoint_vect - position_vect)
+        return dotproduct >= 0
        
     def pose_cb(self, msg):
         self.pose = msg
 
     def waypoints_cb(self, waypoints):
-        # TODO: Implement
-        pass
+        self.base_waypoints = waypoints
+        # create efficient kdtree to search nearest waypoint
+        if not self.waypoints_2d:
+            self.waypoints_2d = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in waypoints.waypoints]
+            self.waypoints_kdtree = KDTree(self.waypoints_2d)
 
     def traffic_cb(self, msg):
         # TODO: Callback for /traffic_waypoint message. Implement
