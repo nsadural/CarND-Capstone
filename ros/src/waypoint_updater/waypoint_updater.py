@@ -37,12 +37,20 @@ class WaypointUpdater(object):
         self.final_waypoints_pub = rospy.Publisher('final_waypoints', Lane, queue_size=1)
 
         # TODO: Add other member variables you need below
-
+        self.pose = None
+        
         rospy.spin()
 
+    def loop():
+        rate = rospy.Rate(50) // 50 Hz
+        while not rospy.is_shutdown():
+            msg = Float64()
+            msg.data = read_temperature_sensor_data()
+            self.final_waypoints_pub.publish(msg)
+            rate.sleep()
+       
     def pose_cb(self, msg):
-        # TODO: Implement
-        pass
+        self.pose = msg
 
     def waypoints_cb(self, waypoints):
         # TODO: Implement
