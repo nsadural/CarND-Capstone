@@ -2,6 +2,7 @@ import os
 import cv2
 import numpy as np
 import rospy
+import yaml
 import tensorflow as tf
 from styx_msgs.msg import TrafficLight
 
@@ -87,7 +88,7 @@ class TLClassifier(object):
 
             # The current box coordinates are normalized to a range between 0 and 1.
             # This converts the coordinates actual location on the image.
-            width, height = image.shape[1]. image.shape[0]
+            width, height = image.shape[1], image.shape[0]
             box_coords = self.to_image_coords(boxes, height, width)
 
             # Each class with be represented by a differently colored box
@@ -107,7 +108,7 @@ class TLClassifier(object):
                 rospy.logwarn("RED Traffic Light detected by the model!")
                 return TrafficLight.RED
             else:
-                return TrafficLight.UNKOWN
+                return TrafficLight.UNKNOWN
 
     #
     # Utility funcs
@@ -123,39 +124,39 @@ class TLClassifier(object):
                 tf.import_graph_def(od_graph_def, name='')
         return graph
 
-#     def filter_boxes(self, min_score, boxes, scores, classes):
-#         """Return boxes with a confidence >= `min_score`"""
-#         n = len(classes)
-#         idxs = []
-#         for i in range(n):
-#             if scores[i] >= min_score:
-#                 idxs.append(i)
+    def filter_boxes(self, min_score, boxes, scores, classes):
+        """Return boxes with a confidence >= `min_score`"""
+        n = len(classes)
+        idxs = []
+        for i in range(n):
+            if scores[i] >= min_score:
+                idxs.append(i)
 
-#         filtered_boxes = boxes[idxs, ...]
-#         filtered_scores = scores[idxs, ...]
-#         filtered_classes = classes[idxs, ...]
-#         return filtered_boxes, filtered_scores, filtered_classes
+        filtered_boxes = boxes[idxs, ...]
+        filtered_scores = scores[idxs, ...]
+        filtered_classes = classes[idxs, ...]
+        return filtered_boxes, filtered_scores, filtered_classes
     
-#     def to_image_coords(self, boxes, height, width):
-#         """
-#         The original box coordinate output is normalized, i.e [0, 1].
+    def to_image_coords(self, boxes, height, width):
+        """
+        The original box coordinate output is normalized, i.e [0, 1].
 
-#         This converts it back to the original coordinate based on the image
-#         size.
-#         """
-#         box_coords = np.zeros_like(boxes)
-#         box_coords[:, 0] = boxes[:, 0] * height
-#         box_coords[:, 1] = boxes[:, 1] * width
-#         box_coords[:, 2] = boxes[:, 2] * height
-#         box_coords[:, 3] = boxes[:, 3] * width
+        This converts it back to the original coordinate based on the image
+        size.
+        """
+        box_coords = np.zeros_like(boxes)
+        box_coords[:, 0] = boxes[:, 0] * height
+        box_coords[:, 1] = boxes[:, 1] * width
+        box_coords[:, 2] = boxes[:, 2] * height
+        box_coords[:, 3] = boxes[:, 3] * width
 
-#         return box_coords
+        return box_coords
     
-#     def draw_boxes(self, image, boxes, classes, thickness=4):
-#         """Draw bounding boxes on the image"""
-#         color_list = {1: (255,0,0), 2: (255,255,0), 3: (0,128,0)}
-#         for i in range(len(boxes)):
-#             bot, left, top, right = boxes[i, ...]
-#             class_id = int(classes[i])
-#             cv2.rectangle(image, (left,top), (right,bot), color_list[class_id], thickness)
+    def draw_boxes(self, image, boxes, classes, thickness=4):
+        """Draw bounding boxes on the image"""
+        color_list = {1: (255,0,0), 2: (255,255,0), 3: (0,128,0)}
+        for i in range(len(boxes)):
+            bot, left, top, right = boxes[i, ...]
+            class_id = int(classes[i])
+            cv2.rectangle(image, (left,top), (right,bot), color_list[class_id], thickness)
     

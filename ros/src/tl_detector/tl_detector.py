@@ -13,7 +13,7 @@ import yaml
 from scipy.spatial import KDTree
 
 STATE_COUNT_THRESHOLD = 3
-TEST_MODE = False
+TEST_MODE = True
 
 class TLDetector(object):
     def __init__(self):
@@ -77,6 +77,7 @@ class TLDetector(object):
         """
         self.has_image = True
         self.camera_image = msg
+        rospy.logwarn('Enter image_cb function!')
         light_wp, state = self.process_traffic_lights()
 
         '''
@@ -154,7 +155,7 @@ class TLDetector(object):
             diff = len(self.waypoints.waypoints)
             for i, light in enumerate(self.lights):
                 # Get stop line waypoint index
-                line = stope_line_positions[i]
+                line = stop_line_positions[i]
                 temp_wp_idx = self.get_closest_waypoint(line[0], line[1])
                 # Find closest stop line waypoint index
                 d = temp_wp_idx - car_wp_idx
@@ -165,9 +166,13 @@ class TLDetector(object):
 
         if closest_light:
             state = self.get_light_state(closest_light)
-            return light_wp_idx, state
+            rospy.logwarn('Distance between curr pos and closest light: %s, Light state: %s', 
+               diff, closest_light)
+            return line_wp_idx, state
         
 #         self.waypoints = None
+        rospy.logwarn('Distance between curr pos and closest light: %s, Light state: %s', 
+               diff, closest_light)
         return -1, TrafficLight.UNKNOWN
 
 if __name__ == '__main__':
