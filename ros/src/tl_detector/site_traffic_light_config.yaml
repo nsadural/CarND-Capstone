@@ -6,4 +6,4 @@ camera_info:
 stop_line_positions:
     - [8.0, 16.2]
 is_site: True
-detection_model: '/light_classification/train_model/frozen_inference_graph_site.pb'
+detection_model: '/train_model/frozen_inference_graph_site.pb'
