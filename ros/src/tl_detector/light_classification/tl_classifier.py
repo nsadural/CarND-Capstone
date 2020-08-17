@@ -100,7 +100,7 @@ class TLClassifier(object):
             # Save the image if detect the traffic light is on
             cv2.imwrite(os.path.join('/saved_images/', "image_%04i.jpg" % (self.image_counter)), image)
             self.image_counter += 1
-
+            rospy.logwarn("red: %s, not red: %s", count_red, count_NonRed)
             # if the number of red traffic light is larger than the one of non-red lights, return RED state
             if count_red < count_NonRed:
                 return TrafficLight.GREEN
