@@ -13,7 +13,7 @@ import yaml
 from scipy.spatial import KDTree
 
 STATE_COUNT_THRESHOLD = 3
-TEST_MODE = True
+TEST_MODE = False
 
 class TLDetector(object):
     def __init__(self):
@@ -79,7 +79,7 @@ class TLDetector(object):
         self.camera_image = msg
         rospy.logwarn('Enter image_cb function!')
         light_wp, state = self.process_traffic_lights()
-
+        rospy.logwarn('light_wp: %s state: %s ', light_wp, state)
         '''
         Publish upcoming red lights at camera frequency.
         Each predicted state has to occur `STATE_COUNT_THRESHOLD` number
@@ -163,15 +163,15 @@ class TLDetector(object):
                     diff = d
                     closest_light = light
                     line_wp_idx = temp_wp_idx
-
+        rospy.logwarn('red: %s, yellow: %s,  green: %s, unknown: %s', TrafficLight.RED, TrafficLight.YELLOW, TrafficLight.GREEN, TrafficLight.UNKNOWN)
         if closest_light:
             state = self.get_light_state(closest_light)
-            rospy.logwarn('Distance between curr pos and closest light: %s, Light state: %s', 
-               diff, closest_light)
+            rospy.logwarn('Recognized state: %s, Diff: %s,  Light state: %s', 
+              state, diff, closest_light)
             return line_wp_idx, state
         
 #         self.waypoints = None
-        rospy.logwarn('Distance between curr pos and closest light: %s, Light state: %s', 
+        rospy.logwarn('No closest light. Diff: %s, Light state: %s', 
                diff, closest_light)
         return -1, TrafficLight.UNKNOWN
 
