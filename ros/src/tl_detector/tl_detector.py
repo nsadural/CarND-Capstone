@@ -13,7 +13,7 @@ import yaml
 from scipy.spatial import KDTree
 
 STATE_COUNT_THRESHOLD = 3
-TEST_MODE = True
+TEST_MODE = False
 
 class TLDetector(object):
     def __init__(self):
