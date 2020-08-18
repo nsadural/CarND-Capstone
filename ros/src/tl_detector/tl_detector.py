@@ -25,6 +25,7 @@ class TLDetector(object):
         self.waypoint_tree = None
         self.camera_image = None
         self.lights = []
+        self.received_images = 0  # Create a counter to count the received image, in order to speed up, only process 1 out of 3 images received
 
         sub1 = rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
         sub2 = rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
@@ -78,6 +79,7 @@ class TLDetector(object):
         self.has_image = True
         self.camera_image = msg
         
+        
         light_wp, state = self.process_traffic_lights()
         
         '''
@@ -97,6 +99,9 @@ class TLDetector(object):
         else:
             self.upcoming_red_light_pub.publish(Int32(self.last_wp))
         self.state_count += 1
+        
+        # Uncomment to debug
+        # rospy.logwarn('self.state: %s, self.last_state: %s, self.last_wp: %s .', self.state, self.last_state, self.last_wp)  
 
     def get_closest_waypoint(self, x, y):
         """Identifies the closest path waypoint to the given position
@@ -163,20 +168,28 @@ class TLDetector(object):
                     diff = d
                     closest_light = light
                     line_wp_idx = temp_wp_idx
-            
-            # if the distance between current vehicle position and the closest traffic light position is larger than 250 waypoints, then return 'Unknown' State
-            
+           
+        # if the current vehicle position is close to traffic light AND the image counter equals to 3, then we will use the image detection function     
         if closest_light and diff < 250:
-            state = self.get_light_state(closest_light)
-            classes = {TrafficLight.RED : 'Red',
-                        TrafficLight.YELLOW : 'Yellow',
-                        TrafficLight.GREEN : 'Green',
-                        TrafficLight.UNKNOWN : 'Unknown'}
-            rospy.logwarn('\n Recognized Traffic Light: %s \n Distance between the closest traffic light and current vehicle: %s \n\n', 
-              classes[state], diff)
+            self.received_images += 1 # Counter plus 1 once received an input image
             
-            return line_wp_idx, state
+            if self.received_images == 3:
+                state = self.get_light_state(closest_light)
+                self.received_images = 0 #reset the image counter
+
+                classes = {TrafficLight.RED : 'Red',
+                            TrafficLight.YELLOW : 'Yellow',
+                            TrafficLight.GREEN : 'Green',
+                            TrafficLight.UNKNOWN : 'Unknown'}
+                rospy.logwarn('\n Recognized Traffic Light: %s \n Distance between the closest traffic light and current vehicle: %s \n\n', 
+                  classes[state], diff)
+
+                return line_wp_idx, state
+            else: # If the image counter is less than 3 images, we just return the laest state and last light waypoint
+                return self.last_wp, self.state 
         
+        # if the distance between current vehicle position and the closest traffic light position 
+        # is larger than 250 waypoints, then return 'Unknown' State 
         rospy.logwarn('TrafficLight is too far. No traffic light detected.')
         return -1, TrafficLight.UNKNOWN
 
