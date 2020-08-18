@@ -37,10 +37,7 @@ To set up port forwarding, please refer to the [instructions from term 2](https:
 
 ### Usage
 
-1. Clone the project repository
-```bash
-git clone https://github.com/udacity/CarND-Capstone.git
-```
+1. `git clone` this project repository
 
 2. Install python dependencies
 ```bash
@@ -48,25 +45,14 @@ cd CarND-Capstone
 pip install -r requirements.txt
 ```
 
-3. Run the roscore
-```bash
-roscore
-```
-
-4. Install dbw-mkz-msgs package
-```bash
-sudo apt-get update
-sudo apt-get install -y ros-kinetic-dbw-mkz-msgs
-```
-
-4. Make and run styx
+3. Make and run styx
 ```bash
 cd ros
 catkin_make
 source devel/setup.sh
 roslaunch launch/styx.launch
 ```
-5. Run the simulator
+4. Run the simulator
 
 ### Real world testing
 1. Download [training bag](https://s3-us-west-1.amazonaws.com/udacity-selfdrivingcar/traffic_light_bag_file.zip) that was recorded on the Udacity self-driving car.
