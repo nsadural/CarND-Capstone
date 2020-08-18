@@ -37,10 +37,7 @@ To set up port forwarding, please refer to the [instructions from term 2](https:
 
 ### Usage
 
-1. Clone the project repository
-```bash
-git clone https://github.com/xiaohuieddie/CarND-Capstone.git
-```
+1. `git clone` this project repository
 
 2. Install python dependencies
 ```bash

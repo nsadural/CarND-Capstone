@@ -71,24 +71,25 @@ class TLClassifier(object):
         scores = np.squeeze(scores)
         classes = np.squeeze(classes)
 
-        count_NonRed = count_red = 0
+        count = {1: 0, 2: 0, 3: 0}  # 1 - Red, 2 - Yellow, 3 - Green
         for i in range(len(boxes)):
             if scores[i] > min_score_thresh:  
                 light_state = self.classes[classes[i]]
                 if light_state == TrafficLight.RED:
-                    count_red += 1
-                else:
-                    count_NonRed += 1
-
-        rospy.logwarn("red: %s, not red: %s", count_red, count_NonRed)
-        # if the number of red traffic light is larger than the one of non-red lights, return RED state
-        if count_red < count_NonRed:
-            return TrafficLight.GREEN
-        elif count_red != 0:
-            rospy.logwarn("RED Traffic Light detected by the model!")
-            return TrafficLight.RED
-        else:       
-            return TrafficLight.UNKNOWN
+                    count[1] += 1
+                elif light_state == TrafficLight.YELLOW:
+                    count[2] += 1
+                elif light_state == TrafficLight.GREEN:
+                    count[3] += 1
+                    
+                    
+        count_list = sorted(count.items(), key = lambda kv:(kv[1], kv[0])) # sort the count dictionary and then return the biggest one
+        rospy.logwarn("Number of Red: %s, Number of Yellow: %s, Number of Green: %s", count[1], count[2], count[3])
+        if count_list[-1][1] != 0:
+            return self.classes[count_list[-1][0]]
+        else:
+            return TrafficLight.UNKNOWN   # return UNKNOWN if not detect any of the traffic lights
+        
     
     #
     # Utility funcs

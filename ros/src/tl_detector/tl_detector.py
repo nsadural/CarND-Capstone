@@ -77,9 +77,9 @@ class TLDetector(object):
         """
         self.has_image = True
         self.camera_image = msg
-        rospy.logwarn('Enter image_cb function!')
+        
         light_wp, state = self.process_traffic_lights()
-        rospy.logwarn('light_wp: %s state: %s ', light_wp, state)
+        
         '''
         Publish upcoming red lights at camera frequency.
         Each predicted state has to occur `STATE_COUNT_THRESHOLD` number
@@ -163,16 +163,21 @@ class TLDetector(object):
                     diff = d
                     closest_light = light
                     line_wp_idx = temp_wp_idx
-        rospy.logwarn('red: %s, yellow: %s,  green: %s, unknown: %s', TrafficLight.RED, TrafficLight.YELLOW, TrafficLight.GREEN, TrafficLight.UNKNOWN)
-        if closest_light:
+            
+            # if the distance between current vehicle position and the closest traffic light position is larger than 250 waypoints, then return 'Unknown' State
+            
+        if closest_light and diff < 250:
             state = self.get_light_state(closest_light)
-            rospy.logwarn('Recognized state: %s, Diff: %s,  Light state: %s', 
-              state, diff, closest_light)
+            classes = {TrafficLight.RED : 'Red',
+                        TrafficLight.YELLOW : 'Yellow',
+                        TrafficLight.GREEN : 'Green',
+                        TrafficLight.UNKNOWN : 'Unknown'}
+            rospy.logwarn('\n Recognized Traffic Light: %s \n Distance between the closest traffic light and current vehicle: %s \n\n', 
+              classes[state], diff)
+            
             return line_wp_idx, state
         
-#         self.waypoints = None
-        rospy.logwarn('No closest light. Diff: %s, Light state: %s', 
-               diff, closest_light)
+        rospy.logwarn('TrafficLight is too far. No traffic light detected.')
         return -1, TrafficLight.UNKNOWN
 
 if __name__ == '__main__':
