@@ -68,7 +68,7 @@ class DBWNode(object):
         rospy.Subscriber('/current_velocity', TwistStamped , self.velocity_cb)
         rospy.Subscriber('/vehicle/dbw_enabled', Bool, self.dbw_enabled_cb)
         rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
-        rospy.Subscriber('/final_waypoints', Lane, self.waypoints_cb)
+        #rospy.Subscriber('/final_waypoints', Lane, self.waypoints_cb)
         
         self.current_vel = None
         self.curr_ang_vel = None
