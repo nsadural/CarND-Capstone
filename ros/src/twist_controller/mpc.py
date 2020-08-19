@@ -17,10 +17,12 @@ import do_mpc   # Updated 'requirements.txt' with dependencies
 import rospy
 from casadi import *
 from lowpass import LowPassFilter
+import sys
 
 GAS_DENSITY = 2.858
 ONE_MPH = 0.44704
 V_REF = 0.95 * 25 * ONE_MPH
+MAX_LIMIT = sys.float_info.max
 
 class MPC(object):
     def __init__(self, vehicle_mass, fuel_capacity, brake_deadband, decel_limit, accel_limit, wheel_radius, wheel_base, steer_ratio, max_lat_accel, max_steer_angle):
@@ -95,15 +97,25 @@ class MPC(object):
         lterm = cte0**2 + epsi0**2 + (v0 - V_REF)**2
         mpc.set_objective(mterm=mterm, lterm=lterm)
         mpc.set_rterm(
-            steer0 = 1e-2,
-            a0 = 1e-2
+            steer0 = 1e-6,
+            a0 = 1e-6
             )
 
         ### Define input and state constraints
         # Upper bounds on states
+        mpc.bounds['upper','_x','x0'] = MAX_LIMIT
+        mpc.bounds['upper','_x','y0'] = MAX_LIMIT
+        mpc.bounds['upper','_x','psi0'] = MAX_LIMIT
         mpc.bounds['upper','_x','v0'] = 25 * ONE_MPH  # m/s (25 mph)
+        mpc.bounds['upper','_x','cte0'] = MAX_LIMIT
+        mpc.bounds['upper','_x','epsi0'] = MAX_LIMIT
         # Lower bounds on states
+        mpc.bounds['lower','_x','x0'] = -MAX_LIMIT
+        mpc.bounds['lower','_x','y0'] = -MAX_LIMIT
+        mpc.bounds['lower','_x','psi0'] = -MAX_LIMIT
         mpc.bounds['lower','_x','v0'] = 0.0
+        mpc.bounds['lower','_x','cte0'] = -MAX_LIMIT
+        mpc.bounds['lower','_x','epsi0'] = -MAX_LIMIT
 
         # Upper bounds on inputs
         mpc.bounds['upper','_u','steer0'] = max_steer_angle
