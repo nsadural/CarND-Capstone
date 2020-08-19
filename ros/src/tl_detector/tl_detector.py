@@ -113,7 +113,6 @@ class TLDetector(object):
             int: index of the closest waypoint in self.waypoints
 
         """
-        #TODO implement
         closest_idx = self.waypoint_tree.query([x, y], 1)[1]
         return closest_idx
 
@@ -156,7 +155,6 @@ class TLDetector(object):
         if(self.pose):
             car_wp_idx = self.get_closest_waypoint(self.pose.pose.position.x, self.pose.pose.position.y)
 
-            #TODO find the closest visible traffic light (if one exists)
             diff = len(self.waypoints.waypoints)
             for i, light in enumerate(self.lights):
                 # Get stop line waypoint index
@@ -181,8 +179,8 @@ class TLDetector(object):
                             TrafficLight.YELLOW : 'Yellow',
                             TrafficLight.GREEN : 'Green',
                             TrafficLight.UNKNOWN : 'Unknown'}
-                rospy.logwarn('\n Recognized Traffic Light: %s \n Distance between the closest traffic light and current vehicle: %s \n\n', 
-                  classes[state], diff)
+                #rospy.logwarn('\n Recognized Traffic Light: %s \n Distance between the closest traffic light and current vehicle: %s \n\n', 
+                #  classes[state], diff)
 
                 return line_wp_idx, state
             else: # If the image counter is less than 3 images, we just return the laest state and last light waypoint
@@ -190,7 +188,7 @@ class TLDetector(object):
         
         # if the distance between current vehicle position and the closest traffic light position 
         # is larger than 250 waypoints, then return 'Unknown' State 
-        rospy.logwarn('TrafficLight is too far. No traffic light detected.')
+        #rospy.logwarn('TrafficLight is too far. No traffic light detected.')
         return -1, TrafficLight.UNKNOWN
 
 if __name__ == '__main__':

@@ -8,7 +8,6 @@ ONE_MPH = 0.44704
 
 class Controller(object):
     def __init__(self, vehicle_mass, fuel_capacity, brake_deadband, decel_limit, accel_limit, wheel_radius, wheel_base, steer_ratio, max_lat_accel, max_steer_angle):
-        # TODO: Implement
         self.yaw_controller = YawController(wheel_base, steer_ratio, 0.1, max_lat_accel, max_steer_angle)
         
         kp = 0.3
@@ -33,7 +32,6 @@ class Controller(object):
         
 
     def control(self, current_vel, curr_ang_vel, linear_vel, angular_vel, dbw_enabled):
-        # TODO: Change the arg, kwarg list to suit your needs
         # Return throttle, brake, steer
         
         # If the dbw is turned off, we will reset our PID controller and return nothing
@@ -68,7 +66,6 @@ class Controller(object):
             decel = max(vel_error, self.decel_limit)
             brake = abs(decel) * self.vehicle_mass * self.wheel_radius # Brake torque( N*m) = deceleration * mass * wheel radius
         
-        rospy.loginfo('Throttle: %s, Brake: %s, Steering: %s', 
-               throttle, brake, steering)
+        #rospy.loginfo('Throttle: %s, Brake: %s, Steering: %s', throttle, brake, steering)
         
         return throttle, brake, steering

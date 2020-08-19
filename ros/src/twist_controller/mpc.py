@@ -62,7 +62,7 @@ class MPC(object):
 
         ### Define model parameters
         dt = 0.02   # 1/50 Hz = 0.02 s
-        L_f = 0.40*wheel_base   # TODO: Tune parameter due to uncertainty based on simulation performance
+        L_f = 0.40*wheel_base   # Tune parameter due to uncertainty based on simulation performance
 
         ### Define discrete equations
         x1 = x0 + v0*np.cos(psi0)*dt
