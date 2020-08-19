@@ -118,11 +118,11 @@ class DBWNode(object):
         self.current_vel = msg.twist.linear.x
         self.curr_ang_vel = msg.twist.angular.z
 
-    def waypoints_cb(self, waypoints):
-        self.waypoints = waypoints
-        self.wp_x = waypoints[0].pose.pose.position.x
-        self.wp_y = waypoints[0].pose.pose.position.y
-        self.wp_psi = 2 * math.acos(waypoints[0].pose.pose.orientation.w)   # Calculates waypoint yaw angle from quaternion w-coordinate
+    #def waypoints_cb(self, waypoints):
+    #    self.waypoints = waypoints
+    #    self.wp_x = waypoints[0].pose.pose.position.x
+    #    self.wp_y = waypoints[0].pose.pose.position.y
+    #    self.wp_psi = 2 * math.acos(waypoints[0].pose.pose.orientation.w)   # Calculates waypoint yaw angle from quaternion w-coordinate
 
     def publish(self, throttle, brake, steer):
         tcmd = ThrottleCmd()
