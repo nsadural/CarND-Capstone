@@ -78,6 +78,9 @@ class DBWNode(object):
         self.x = None
         self.y = None
         self.psi = None
+        self.wp_x = None
+        self.wp_y = None
+        self.wp_psi = None
         self.throttle = self.steering = self.brake = 0
 
         self.loop()
@@ -99,7 +102,7 @@ class DBWNode(object):
     def pose_cb(self, msg):
         self.x = msg.pose.position.x
         self.y = msg.pose.position.y
-        self.psi = 2 * math.acos(msg.pose.orientation)  # Calculates yaw angle from quaternion w-coordinate
+        self.psi = 2 * math.acos(msg.pose.orientation.w)  # Calculates yaw angle from quaternion w-coordinate
         
     def twist_cb(self, msg):
         self.linear_vel = msg.twist.linear.x
