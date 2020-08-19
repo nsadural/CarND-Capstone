@@ -13,7 +13,7 @@
 ###
 
 import numpy as np
-import do_mpc   # Updated 'requirements.txt' with dependencies
+#import do_mpc   # NOTE: Python 3.X package, does not work with Python 2.7
 import rospy
 from casadi import *
 from lowpass import LowPassFilter
