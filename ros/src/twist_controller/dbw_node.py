@@ -3,8 +3,10 @@
 import rospy
 from std_msgs.msg import Bool
 from dbw_mkz_msgs.msg import ThrottleCmd, SteeringCmd, BrakeCmd, SteeringReport
-from geometry_msgs.msg import TwistStamped
+from geometry_msgs.msg import TwistStamped, PoseStamped
+from styx_msgs.msg import Lane, Waypoint
 import math
+#from mpc import MPC    # NOTE: Python 3.X package, does not work with Python 2.7
 
 from twist_controller import Controller
 
@@ -31,6 +33,7 @@ that we have created in the `__init__` function.
 
 '''
 
+
 class DBWNode(object):
     def __init__(self):
         rospy.init_node('dbw_node')
@@ -53,19 +56,31 @@ class DBWNode(object):
         self.brake_pub = rospy.Publisher('/vehicle/brake_cmd',
                                          BrakeCmd, queue_size=1)
 
-        # TODO: Create `Controller` object
+        # TODO: Create `MPC` object
+        #self.controller = MPC(vehicle_mass, fuel_capacity, brake_deadband, decel_limit, accel_limit, wheel_radius, wheel_base, steer_ratio, max_lat_accel, max_steer_angle)
+
+         # TODO: Create `Controller` object
         self.controller = Controller(vehicle_mass, fuel_capacity, brake_deadband, decel_limit, accel_limit, wheel_radius, wheel_base, steer_ratio, max_lat_accel, max_steer_angle)
+
 
         # TODO: Subscribe to all the topics you need to
         rospy.Subscriber('/twist_cmd', TwistStamped, self.twist_cb)
         rospy.Subscriber('/current_velocity', TwistStamped , self.velocity_cb)
         rospy.Subscriber('/vehicle/dbw_enabled', Bool, self.dbw_enabled_cb)
+        rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
+        #rospy.Subscriber('/final_waypoints', Lane, self.waypoints_cb)
         
         self.current_vel = None
         self.curr_ang_vel = None
         self.dbw_enabled = None
         self.linear_vel = None
         self.angular_vel = None
+        self.x = None
+        self.y = None
+        self.psi = None
+        self.wp_x = None
+        self.wp_y = None
+        self.wp_psi = None
         self.throttle = self.steering = self.brake = 0
 
         self.loop()
@@ -76,6 +91,8 @@ class DBWNode(object):
             # TODO: Get predicted throttle, brake, and steering using `twist_controller`
             # You should only publish the control commands if dbw is enabled
             if not None in (self.current_vel, self.linear_vel, self.angular_vel):
+                # NOTE: For MPC...
+                #self.throttle, self.brake, self.steering = self.controller.control(self.x, self.y, self.psi, self.current_vel, self.wp_x, self.wp_y, self.wp_psi, self.dbw_enabled)
                 self.throttle, self.brake, self.steering = self.controller.control(self.current_vel,
                                                                     self.curr_ang_vel,
                                                                     self.linear_vel,
@@ -84,8 +101,14 @@ class DBWNode(object):
             if self.dbw_enabled:
                 self.publish(self.throttle, self.brake, self.steering)
             rate.sleep()
+
     def dbw_enabled_cb(self, msg):
         self.dbw_enabled = msg
+
+    def pose_cb(self, msg):
+        self.x = msg.pose.position.x
+        self.y = msg.pose.position.y
+        self.psi = 2 * math.acos(msg.pose.orientation.w)  # Calculates yaw angle from quaternion w-coordinate
         
     def twist_cb(self, msg):
         self.linear_vel = msg.twist.linear.x
@@ -94,6 +117,12 @@ class DBWNode(object):
     def velocity_cb(self, msg):
         self.current_vel = msg.twist.linear.x
         self.curr_ang_vel = msg.twist.angular.z
+
+    #def waypoints_cb(self, waypoints):
+    #    self.waypoints = waypoints
+    #    self.wp_x = waypoints[0].pose.pose.position.x
+    #    self.wp_y = waypoints[0].pose.pose.position.y
+    #    self.wp_psi = 2 * math.acos(waypoints[0].pose.pose.orientation.w)   # Calculates waypoint yaw angle from quaternion w-coordinate
 
     def publish(self, throttle, brake, steer):
         tcmd = ThrottleCmd()
