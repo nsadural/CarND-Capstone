@@ -36,7 +36,7 @@ class TLClassifier(object):
         return self.predict(img, self.min_score_thresh)
     
     def preprocess_img(self, img):
-#         img = cv2.resize(img, (300, 300))
+        img = cv2.resize(img, (300, 300))
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         return img
     

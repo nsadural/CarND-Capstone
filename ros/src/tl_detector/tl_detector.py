@@ -79,7 +79,7 @@ class TLDetector(object):
         self.camera_image = msg
         
         light_wp, state = self.process_traffic_lights()
-        
+#         rospy.logwarn('light_wp: %s, state: %s', light_wp, state)
         '''
         Publish upcoming red lights at camera frequency.
         Each predicted state has to occur `STATE_COUNT_THRESHOLD` number
@@ -170,8 +170,8 @@ class TLDetector(object):
                         TrafficLight.YELLOW : 'Yellow',
                         TrafficLight.GREEN : 'Green',
                         TrafficLight.UNKNOWN : 'Unknown'}
-            #rospy.logwarn('\n Recognized Traffic Light: %s \n Distance between the closest traffic light and current vehicle: %s \n\n', 
-            #  classes[state], diff)
+            rospy.logwarn('\n Recognized Traffic Light: %s \n Distance between the closest traffic light and current vehicle: %s \n\n', 
+             classes[state], diff)
             return line_wp_idx, state
         #rospy.logwarn('TrafficLight is too far. No traffic light detected.')
         return -1, TrafficLight.UNKNOWN
