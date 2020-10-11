@@ -1,9 +1,48 @@
+# Programming a Real Self-Driving Car
+
+This is the project repo for the final project of the Udacity Self-Driving Car Nanodegree: Programming a Real Self-Driving Car. For more information about the project, see the starting project [here](https://github.com/udacity/CarND-Capstone).
+
 Project Team:
  1. Team Lead - Felix Larsen (i4guar@gmail.com)
  2. Team Member - Xiaohui Luo (xiaohuil@umich.edu)
  3. Team Member - Nikko Sadural (nsadural@purdue.edu)
 
-This is the project repo for the final project of the Udacity Self-Driving Car Nanodegree: Programming a Real Self-Driving Car. For more information about the project, see the project introduction [here](https://classroom.udacity.com/nanodegrees/nd013/parts/6047fe34-d93c-4f50-8336-b70ef10cb4b2/modules/e1a23b06-329a-4684-a717-ad476f0d8dff/lessons/462c933d-9f24-42d3-8bdc-a08a5fc866e4/concepts/5ab4b122-83e6-436d-850f-9f4d26627fd9).
+As a team our tasks were to:
+* Select the correct waypoints and determine the target velocities at them depending on the traffic light situation
+* Publish the steering, brake and gas input to the Drive-By-Wire module
+* Detect the traffic lights and recognize their color to be able to react accordingly 
+
+## Simulator
+[//]: # (Image References)
+
+[follow_road]: ./res/follow_road.png "Follow Road"
+[green_light_continue]: ./res/green_light_continue.png "Green Light Continue"
+[red_light]: ./res/red_light.png "Red Light"
+[simulator]: ./res/simulator.png "Simulator"
+[traffic_light_sim]: ./res/traffic_light_sim.png "Traffic Light Simulator"
+[traffic_light_real]: ./res/traffic_light_real.png "Traffic Light Real World"
+
+This is the simulator provided by udacity:
+![alt text][simulator]
+
+The car is able to stop at red lights:
+![alt text][red_light]
+
+It will continue when the traffic lights are green:
+![alt text][green_light_continue]
+
+The car also follows the lane of the road:
+![alt text][follow_road]
+
+This is a short [screen recording of the result](./res/video.mov).
+
+## Traffic light detection
+
+The car is able to recognize traffic lights in both a real environment and the simulator:
+![alt text][traffic_light_sim]
+![alt text][traffic_light_real]
+
+## Installation
 
 Please use **one** of the two installation options, either native **or** docker installation.
 

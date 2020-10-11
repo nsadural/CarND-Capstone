@@ -8,7 +8,6 @@ from styx_msgs.msg import TrafficLight
 
 class TLClassifier(object):
     def __init__(self):
-        #TODO load classifier
         
         self.classes = {1: TrafficLight.RED,
                         2: TrafficLight.YELLOW,
@@ -33,12 +32,11 @@ class TLClassifier(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
 
         """
-        #TODO implement light color prediction
         img = self.preprocess_img(image)
         return self.predict(img, self.min_score_thresh)
     
     def preprocess_img(self, img):
-#         img = cv2.resize(img, (300, 300))
+        img = cv2.resize(img, (300, 300))
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         return img
     
@@ -84,7 +82,7 @@ class TLClassifier(object):
                     
                     
         count_list = sorted(count.items(), key = lambda kv:(kv[1], kv[0])) # sort the count dictionary and then return the biggest one
-        rospy.logwarn("Number of Red: %s, Number of Yellow: %s, Number of Green: %s", count[1], count[2], count[3])
+        #rospy.logwarn("Number of Red: %s, Number of Yellow: %s, Number of Green: %s", count[1], count[2], count[3])
         if count_list[-1][1] != 0:
             return self.classes[count_list[-1][0]]
         else:

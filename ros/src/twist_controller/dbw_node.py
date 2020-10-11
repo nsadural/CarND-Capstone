@@ -6,6 +6,7 @@ from dbw_mkz_msgs.msg import ThrottleCmd, SteeringCmd, BrakeCmd, SteeringReport
 from geometry_msgs.msg import TwistStamped, PoseStamped
 from styx_msgs.msg import Lane, Waypoint
 import math
+# NOTE: For MPC...
 #from mpc import MPC    # NOTE: Python 3.X package, does not work with Python 2.7
 
 from twist_controller import Controller
@@ -56,18 +57,17 @@ class DBWNode(object):
         self.brake_pub = rospy.Publisher('/vehicle/brake_cmd',
                                          BrakeCmd, queue_size=1)
 
-        # TODO: Create `MPC` object
+        # NOTE: For MPC...
         #self.controller = MPC(vehicle_mass, fuel_capacity, brake_deadband, decel_limit, accel_limit, wheel_radius, wheel_base, steer_ratio, max_lat_accel, max_steer_angle)
 
-         # TODO: Create `Controller` object
         self.controller = Controller(vehicle_mass, fuel_capacity, brake_deadband, decel_limit, accel_limit, wheel_radius, wheel_base, steer_ratio, max_lat_accel, max_steer_angle)
 
 
-        # TODO: Subscribe to all the topics you need to
         rospy.Subscriber('/twist_cmd', TwistStamped, self.twist_cb)
         rospy.Subscriber('/current_velocity', TwistStamped , self.velocity_cb)
         rospy.Subscriber('/vehicle/dbw_enabled', Bool, self.dbw_enabled_cb)
         rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
+        # NOTE: For MPC...
         #rospy.Subscriber('/final_waypoints', Lane, self.waypoints_cb)
         
         self.current_vel = None
@@ -88,7 +88,6 @@ class DBWNode(object):
     def loop(self):
         rate = rospy.Rate(50) # 50Hz
         while not rospy.is_shutdown():
-            # TODO: Get predicted throttle, brake, and steering using `twist_controller`
             # You should only publish the control commands if dbw is enabled
             if not None in (self.current_vel, self.linear_vel, self.angular_vel):
                 # NOTE: For MPC...
@@ -118,6 +117,7 @@ class DBWNode(object):
         self.current_vel = msg.twist.linear.x
         self.curr_ang_vel = msg.twist.angular.z
 
+    # NOTE: For MPC...
     #def waypoints_cb(self, waypoints):
     #    self.waypoints = waypoints
     #    self.wp_x = waypoints[0].pose.pose.position.x
