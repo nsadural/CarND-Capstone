@@ -126,7 +126,7 @@ class DBWNode(object):
     def waypoints_cb(self, waypoints):
         self.waypoints = waypoints
         self.wp_x = [waypoint.pose.pose.position.x for waypoint in waypoints.waypoints]
-        self.wp_y = [waypoing.pose.pose.position.y for waypoint in waypoints.waypoints]
+        self.wp_y = [waypoint.pose.pose.position.y for waypoint in waypoints.waypoints]
         self.wp_psi = [2*math.acos(waypoint.pose.pose.orientation.w) for waypoint in waypoints.waypoints]
 
     def publish(self, throttle, brake, steer):
