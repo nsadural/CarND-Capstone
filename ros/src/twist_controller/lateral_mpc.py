@@ -96,9 +96,9 @@ class LateralMPC(object):
         thresh_velocity = 15
         if (current_velocity < thresh_velocity):
             # Kinematic bicycle model
-            m.Equations([x.dt() == self.current_velocity*m.cos(psi + beta),
-                         y.dt() == self.current_velocity*m.sin(psi + beta),
-                         psi.dt() == self.current_velocity*m.cos(beta)/self.wheel_base*m.tan(delta*pi/180),
+            m.Equations([x.dt() == current_velocity*m.cos(psi + beta),
+                         y.dt() == current_velocity*m.sin(psi + beta),
+                         psi.dt() == current_velocity*m.cos(beta)/self.wheel_base*m.tan(delta*pi/180),
                          cte == (A*x + B*y + C)/m.sqrt(A*A + B*B),
                          epsi == psi_des - (psi + beta),
                          beta == m.atan((self.rear_to_cg/self.wheel_base)*m.tan(delta*pi/180))])
