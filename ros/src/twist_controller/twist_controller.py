@@ -1,6 +1,7 @@
 from pid import PID
 from yaw_controller import YawController
 from lowpass import LowPassFilter
+from lateral_mpc import LateralMPC
 import rospy
 
 GAS_DENSITY = 2.858
@@ -8,7 +9,8 @@ ONE_MPH = 0.44704
 
 class Controller(object):
     def __init__(self, vehicle_mass, fuel_capacity, brake_deadband, decel_limit, accel_limit, wheel_radius, wheel_base, steer_ratio, max_lat_accel, max_steer_angle):
-        self.yaw_controller = YawController(wheel_base, steer_ratio, 0.1, max_lat_accel, max_steer_angle)
+        #self.yaw_controller = YawController(wheel_base, steer_ratio, 0.1, max_lat_accel, max_steer_angle)
+        self.yaw_controller = LateralMPC(vehicle_mass, wheel_base, max_steer_angle)
         
         kp = 0.3
         ki = 0.1
@@ -27,11 +29,13 @@ class Controller(object):
         self.decel_limit = decel_limit
         self.accel_limit = accel_limit
         self.wheel_radius = wheel_radius
+        self.future_steering = []
+        self.previous_steering = 0
         
         self.last_time = rospy.get_time()
         
 
-    def control(self, current_vel, curr_ang_vel, linear_vel, angular_vel, dbw_enabled):
+    def control(self, current_vel, curr_ang_vel, linear_vel, angular_vel, dbw_enabled, current_x, current_y, current_psi, current_latvel, trajectory_x, trajectory_y, trajectory_psi):
         # Return throttle, brake, steer
         
         # If the dbw is turned off, we will reset our PID controller and return nothing
@@ -39,8 +43,24 @@ class Controller(object):
             self.throttle_controller.reset()
             return 0., 0., 0.
         
-        curren_vel = self.vel_lpf.filt(current_vel) # Filter out the high-frequency noise in velocity
-        steering = self.yaw_controller.get_steering(linear_vel, angular_vel, current_vel)
+        # Filter out the high-frequency noise in velocity
+        curren_vel = self.vel_lpf.filt(current_vel)
+        curren_latvel = self.vel_lpf.filt(current_latvel)
+        #steering = self.yaw_controller.get_steering(linear_vel, angular_vel, current_vel)
+        if not self.future_steering:
+            self.future_steering = self.yaw_controller.get_steering(self.previous_steering, 
+                                                                    current_x, 
+                                                                    current_y, 
+                                                                    current_psi, 
+                                                                    curren_vel, 
+                                                                    curren_latvel, 
+                                                                    curr_ang_vel, 
+                                                                    trajectory_x, 
+                                                                    trajectory_y, 
+                                                                    trajectory_psi) 
+
+        self.previous_steering = self.future_steering.pop(0)
+        steering = self.previous_steering
         
 #         rospy.logwarn("Angular vel : {0}".format(angular_vel))
 #         rospy.logwarn("Target vel : {0}".format(linear_vel))
