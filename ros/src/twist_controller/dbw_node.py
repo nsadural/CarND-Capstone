@@ -132,13 +132,9 @@ class DBWNode(object):
         self.waypoints = waypoints
         self.wp_x = [waypoint.pose.pose.position.x for waypoint in waypoints.waypoints]
         self.wp_y = [waypoint.pose.pose.position.y for waypoint in waypoints.waypoints]
-<<<<<<< HEAD
         orientation_list = [[waypoint.pose.pose.orientation.x, waypoint.pose.pose.orientation.y, waypoint.pose.pose.orientation.z, waypoint.pose.pose.orientation.w] for waypoint in waypoints.waypoints]
         self.wp_psi = [euler_from_quaternion(quat_list)[2] for quat_list in orientation_list]
         #self.wp_psi = [2*math.acos(waypoint.pose.pose.orientation.w)%(2*math.pi) for waypoint in waypoints.waypoints]
-=======
-        self.wp_psi = [2*math.acos(waypoint.pose.pose.orientation.w) for waypoint in waypoints.waypoints]
->>>>>>> bbfbe2ed332b405636019199c85ae36c456cb796
 
     def publish(self, throttle, brake, steer):
         tcmd = ThrottleCmd()

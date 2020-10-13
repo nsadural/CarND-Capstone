@@ -21,15 +21,17 @@ class LateralMPC(object):
         self.rear_cornering_stiffness = 867*180/pi
         self.pred_horizon = 25
         self.pred_time = 0.02
-        self.ctrl_horizon = 10        
+        self.ctrl_horizon = 5        
         
     def get_steering(self, current_steer, current_x, current_y, current_psi, current_velocity, current_lateral_velocity, current_yaw_rate, trajectory_x, trajectory_y, trajectory_psi):
         # Translate vehicle and trajectory points to trajectory frame
-        current_x -= trajectory_x[0]
-        current_y -= trajectory_y[0]
+        x_t = trajectory_x[0]
+        y_t = trajectory_y[0]
+        current_x -= x_t
+        current_y -= y_t
         for i in range(len(trajectory_x)):
-            trajectory_x[i] -= trajectory_x[0]
-            trajectory_x[i] -= trajectory_y[0]
+            trajectory_x[i] -= x_t
+            trajectory_y[i] -= y_t
 
         # Rotate vehicle and trajectory points clockwise to trajectory frame
         theta = -np.arctan2(trajectory_y[1], trajectory_x[1])
@@ -40,6 +42,11 @@ class LateralMPC(object):
             trajectory_x[i] = trajectory_x[i]*np.cos(theta) - trajectory_y[i]*np.sin(theta)
             trajectory_y[i] = trajectory_x[i]*np.sin(theta) + trajectory_y[i]*np.cos(theta)
             trajectory_psi[i] += theta
+            
+        ### DEBUG ###
+        #rospy.logwarn("x_t : {0}".format(x_t))
+        #rospy.logwarn("y_t : {0}".format(y_t))
+        #rospy.logwarn("Transformed trajectory_x : {0}".format(trajectory_x))
 
         # Polynomial fit of trajectory cubic spline and derivatives
         cs = interpolate.CubicSpline(trajectory_x, trajectory_y)
@@ -130,7 +137,8 @@ class LateralMPC(object):
         steering = []
         for i in range(self.ctrl_horizon):
             steering.append(delta.value[i+1]*self.steer_ratio*pi/180)
-            
+        
+        ### DEBUG ###
         rospy.logwarn("MPC steering : {0}\n".format(steering))
 
         return steering

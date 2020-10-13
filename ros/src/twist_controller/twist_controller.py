@@ -49,9 +49,6 @@ class Controller(object):
         curren_latvel = self.vel_lpf.filt(current_latvel)
         #steering = self.yaw_controller.get_steering(linear_vel, angular_vel, current_vel)
         if not self.future_steering:
-            trajectory_x.pop(0)
-            trajectory_y.pop(0)
-            trajectory_psi.pop(0)
             self.future_steering = self.yaw_controller.get_steering(self.previous_steering, 
                                                                     current_x, 
                                                                     current_y, 
@@ -73,8 +70,8 @@ class Controller(object):
         #rospy.logwarn("Current x : {0}".format(current_x))
         #rospy.logwarn("Current y : {0}".format(current_y))
         #rospy.logwarn("Current heading : {0}".format(current_psi))
-        rospy.logwarn("Trajectory x[0] : {0}".format(trajectory_x[0]))
-        rospy.logwarn("Trajectory y[0] : {0}\n".format(trajectory_y[0]))
+        #rospy.logwarn("Trajectory x[0] : {0}".format(trajectory_x[0]))
+        #rospy.logwarn("Trajectory y[0] : {0}\n".format(trajectory_y[0]))
         #rospy.logwarn("Trajectory heading[0] : {0}".format(trajectory_psi[0]))
         
         vel_error = linear_vel - current_vel
