@@ -10,7 +10,7 @@ ONE_MPH = 0.44704
 class Controller(object):
     def __init__(self, vehicle_mass, fuel_capacity, brake_deadband, decel_limit, accel_limit, wheel_radius, wheel_base, steer_ratio, max_lat_accel, max_steer_angle):
         #self.yaw_controller = YawController(wheel_base, steer_ratio, 0.1, max_lat_accel, max_steer_angle)
-        self.yaw_controller = LateralMPC(vehicle_mass, wheel_base, max_steer_angle)
+        self.yaw_controller = LateralMPC(vehicle_mass, wheel_base, max_steer_angle, steer_ratio)
         
         kp = 0.3
         ki = 0.1
@@ -31,6 +31,7 @@ class Controller(object):
         self.wheel_radius = wheel_radius
         self.future_steering = []
         self.previous_steering = 0
+        self.iteration = 0
         
         self.last_time = rospy.get_time()
         
@@ -48,6 +49,9 @@ class Controller(object):
         curren_latvel = self.vel_lpf.filt(current_latvel)
         #steering = self.yaw_controller.get_steering(linear_vel, angular_vel, current_vel)
         if not self.future_steering:
+            trajectory_x.pop(0)
+            trajectory_y.pop(0)
+            trajectory_psi.pop(0)
             self.future_steering = self.yaw_controller.get_steering(self.previous_steering, 
                                                                     current_x, 
                                                                     current_y, 
@@ -62,11 +66,16 @@ class Controller(object):
         self.previous_steering = self.future_steering.pop(0)
         steering = self.previous_steering
         
-#         rospy.logwarn("Angular vel : {0}".format(angular_vel))
-#         rospy.logwarn("Target vel : {0}".format(linear_vel))
-#         rospy.logwarn("Target angular vel : {0}\n".format(angular_vel))
-#         rospy.logwarn("Current vel : {0}".format(current_vel))
-#         rospy.logwarn("Filtered vel : {0}".format(self.vel_lpf.get()))
+        rospy.logwarn("ITERATION : {0}".format(self.iteration))
+        self.iteration += 1
+        #rospy.logwarn("Current velocity : {0}".format(current_vel))
+        #rospy.logwarn("Current steering : {0}".format(steering))
+        #rospy.logwarn("Current x : {0}".format(current_x))
+        #rospy.logwarn("Current y : {0}".format(current_y))
+        #rospy.logwarn("Current heading : {0}".format(current_psi))
+        rospy.logwarn("Trajectory x[0] : {0}".format(trajectory_x[0]))
+        rospy.logwarn("Trajectory y[0] : {0}\n".format(trajectory_y[0]))
+        #rospy.logwarn("Trajectory heading[0] : {0}".format(trajectory_psi[0]))
         
         vel_error = linear_vel - current_vel
         self.last_vel = current_vel

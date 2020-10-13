@@ -5,11 +5,13 @@ from gekko import GEKKO
 import numpy as np
 from scipy import interpolate
 from math import pi
+import rospy
 
 class LateralMPC(object):
-    def __init__(self, vehicle_mass, wheel_base, max_steer_angle):
+    def __init__(self, vehicle_mass, wheel_base, max_steer_angle, steer_ratio):
         self.vehicle_mass = vehicle_mass
         self.wheel_base = wheel_base
+        self.steer_ratio = steer_ratio
         self.front_to_cg = 0.35*wheel_base
         self.rear_to_cg = wheel_base - self.front_to_cg
         self.yaw_inertial_moment = 2.86*vehicle_mass - 1315
@@ -17,9 +19,9 @@ class LateralMPC(object):
         self.min_steer = -max_steer_angle
         self.front_cornering_stiffness = 867*180/pi
         self.rear_cornering_stiffness = 867*180/pi
-        self.pred_horizon = 50
+        self.pred_horizon = 25
         self.pred_time = 0.02
-        self.ctrl_horizon = 25        
+        self.ctrl_horizon = 10        
         
     def get_steering(self, current_steer, current_x, current_y, current_psi, current_velocity, current_lateral_velocity, current_yaw_rate, trajectory_x, trajectory_y, trajectory_psi):
         # Translate vehicle and trajectory points to trajectory frame
@@ -57,14 +59,14 @@ class LateralMPC(object):
         psid0 = current_yaw_rate
 
         # Setup GEKKO model
-        m = GEKKO(remote=False)
+        m = GEKKO(remote=True)
         m.time = np.linspace(0, self.pred_horizon*self.pred_time, self.pred_horizon + 1)
         
         # Setup model control variable
-        delta = m.MV(value=delta0, lb=self.min_steer, ub=self.max_steer, name='delta')
+        delta = m.MV(value=delta0, lb=self.min_steer/self.steer_ratio*180/pi, ub=self.max_steer/self.steer_ratio*180/pi, name='delta')
         delta.STATUS = 1
         delta.COST = 0
-        delta.DCOST = 1
+        delta.DCOST = 1000
 
         # Setup model controlled state variables
         cte = m.CV(value=cte0, name='cte')
@@ -93,12 +95,12 @@ class LateralMPC(object):
         C = m.Intermediate(-B*y_des - A*x)
 
         # Select vehicle motion model
-        thresh_velocity = 15
+        thresh_velocity = float('inf')  # Since vehicle does not return twist.linear.y velocity...
         if (current_velocity < thresh_velocity):
             # Kinematic bicycle model
-            m.Equations([x.dt() == self.current_velocity*m.cos(psi + beta),
-                         y.dt() == self.current_velocity*m.sin(psi + beta),
-                         psi.dt() == self.current_velocity*m.cos(beta)/self.wheel_base*m.tan(delta*pi/180),
+            m.Equations([x.dt() == current_velocity*m.cos(psi + beta),
+                         y.dt() == current_velocity*m.sin(psi + beta),
+                         psi.dt() == current_velocity*m.cos(beta)/self.wheel_base*m.tan(delta*pi/180),
                          cte == (A*x + B*y + C)/m.sqrt(A*A + B*B),
                          epsi == psi_des - (psi + beta),
                          beta == m.atan((self.rear_to_cg/self.wheel_base)*m.tan(delta*pi/180))])
@@ -127,7 +129,9 @@ class LateralMPC(object):
         # Return steering commands for predefined control horizon
         steering = []
         for i in range(self.ctrl_horizon):
-            steering.append(delta.value[i+1])
+            steering.append(delta.value[i+1]*self.steer_ratio*pi/180)
+            
+        rospy.logwarn("MPC steering : {0}\n".format(steering))
 
         return steering
 

@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 
+### NEED TO FIX TRAJECTORY[0] BEING OFF, MAYBE LATENCY? STEERING ANGLE UNSTABLE!
+
 import rospy
 from std_msgs.msg import Bool
 from dbw_mkz_msgs.msg import ThrottleCmd, SteeringCmd, BrakeCmd, SteeringReport
 from geometry_msgs.msg import TwistStamped, PoseStamped
 from styx_msgs.msg import Lane, Waypoint
 import math
+from tf.transformations import euler_from_quaternion
 
 from twist_controller import Controller
 
@@ -112,7 +115,9 @@ class DBWNode(object):
     def pose_cb(self, msg):
         self.x = msg.pose.position.x
         self.y = msg.pose.position.y
-        self.psi = 2 * math.acos(msg.pose.orientation.w)
+        orientation_list = [msg.pose.orientation.x, msg.pose.orientation.y, msg.pose.orientation.z, msg.pose.orientation.w] 
+        self.psi = euler_from_quaternion(orientation_list)[2]
+        #self.psi = 2 * math.acos(msg.pose.orientation.w)%(2*math.pi)
         
     def twist_cb(self, msg):
         self.linear_vel = msg.twist.linear.x
@@ -126,8 +131,10 @@ class DBWNode(object):
     def waypoints_cb(self, waypoints):
         self.waypoints = waypoints
         self.wp_x = [waypoint.pose.pose.position.x for waypoint in waypoints.waypoints]
-        self.wp_y = [waypoing.pose.pose.position.y for waypoint in waypoints.waypoints]
-        self.wp_psi = [2*math.acos(waypoint.pose.pose.orientation.w) for waypoint in waypoints.waypoints]
+        self.wp_y = [waypoint.pose.pose.position.y for waypoint in waypoints.waypoints]
+        orientation_list = [[waypoint.pose.pose.orientation.x, waypoint.pose.pose.orientation.y, waypoint.pose.pose.orientation.z, waypoint.pose.pose.orientation.w] for waypoint in waypoints.waypoints]
+        self.wp_psi = [euler_from_quaternion(quat_list)[2] for quat_list in orientation_list]
+        #self.wp_psi = [2*math.acos(waypoint.pose.pose.orientation.w)%(2*math.pi) for waypoint in waypoints.waypoints]
 
     def publish(self, throttle, brake, steer):
         tcmd = ThrottleCmd()
