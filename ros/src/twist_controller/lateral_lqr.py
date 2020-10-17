@@ -45,12 +45,29 @@ class LateralLQR(object):
         steering_ff = abs(np.arctan(current_yaw_rate*self.wheel_base/current_velocity))
 
         # LQR with feedforward compensation
-        steering = k1*cte + k2*epsi + steering_ff
+        steering = (-k1*cte - k2*epsi + steering_ff)/self.steer_ratio
+        steering_B4 = steering
 
         # Verify control within limits
         if steering > self.max_steer:
             steering = self.max_steer
         elif steering < self.min_steer:
             steering = self.min_steer
+            
+        rospy.logwarn("cte [m]: {0}".format(cte))
+        rospy.logwarn("epsi [rad]: {0}".format(epsi))
+        rospy.logwarn("x [m]: {0}".format(x))
+        rospy.logwarn("y [m]: {0}".format(y))
+        rospy.logwarn("trajectory_x[0]: {0}".format(trajectory_x[0]))
+        rospy.logwarn("trajectory_y[0]: {0}".format(trajectory_y[0]))
+        rospy.logwarn("trajectory_x[1]: {0}".format(trajectory_x[1]))
+        rospy.logwarn("trajectory_y[1]: {0}".format(trajectory_y[1]))
+        rospy.logwarn("steering_ff [rad]: {0}".format(steering_ff))
+        rospy.logwarn("delta_B4 [rad]: {0}".format(steering_B4))
+        rospy.logwarn("delta [rad]: {0}\n".format(steering))
+        
+        steering_list = []
+        for j in range(10):
+            steering_list.append(steering)
 
-        return steering
+        return steering_list

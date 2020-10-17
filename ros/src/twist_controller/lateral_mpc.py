@@ -19,9 +19,9 @@ class LateralMPC(object):
         self.min_steer = -max_steer_angle
         self.front_cornering_stiffness = 867*180/pi
         self.rear_cornering_stiffness = 867*180/pi
-        self.pred_horizon = 25
-        self.pred_time = 0.02
-        self.ctrl_horizon = 5        
+        self.pred_horizon = 20
+        self.pred_time = 0.1
+        self.ctrl_horizon = 1        
         
     def get_steering(self, current_steer, current_x, current_y, current_psi, current_velocity, current_lateral_velocity, current_yaw_rate, trajectory_x, trajectory_y, trajectory_psi):
         # Translate vehicle and trajectory points to trajectory frame

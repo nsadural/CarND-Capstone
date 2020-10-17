@@ -58,9 +58,6 @@ class DBWNode(object):
         self.brake_pub = rospy.Publisher('/vehicle/brake_cmd',
                                          BrakeCmd, queue_size=1)
 
-        # NOTE: For MPC...
-        #self.controller = MPC(vehicle_mass, fuel_capacity, brake_deadband, decel_limit, accel_limit, wheel_radius, wheel_base, steer_ratio, max_lat_accel, max_steer_angle)
-
         self.controller = Controller(vehicle_mass, fuel_capacity, brake_deadband, decel_limit, accel_limit, wheel_radius, wheel_base, steer_ratio, max_lat_accel, max_steer_angle)
 
 
@@ -91,8 +88,6 @@ class DBWNode(object):
         while not rospy.is_shutdown():
             # You should only publish the control commands if dbw is enabled
             if not None in (self.current_vel, self.linear_vel, self.angular_vel):
-                # NOTE: For MPC...
-                #self.throttle, self.brake, self.steering = self.controller.control(self.x, self.y, self.psi, self.current_vel, self.wp_x, self.wp_y, self.wp_psi, self.dbw_enabled)
                 self.throttle, self.brake, self.steering = self.controller.control(self.current_vel,
                                                                     self.curr_ang_vel,
                                                                     self.linear_vel,
