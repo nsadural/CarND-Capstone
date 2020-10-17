@@ -37,15 +37,20 @@ class LateralLQR(object):
         cte = -(cs(0, nu=1)*x - y + trajectory_y[0]) / (np.sqrt(pow(cs(0, nu=1), 2) + 1))
         epsi = psi - np.arctan(cs(0, nu=1))
 
-        # LQR gain schedule
-        k1 = -0.17608*current_velocity + 9.55907
-        k2 = -0.08061*current_velocity + 7.45336
+        ### LQR gain schedule
+        # Lower speeds
+        if current_velocity < 15:
+            k1 = -0.000046*current_velocity + 0.031621
+            k2 = -0.000315*current_velocity + 0.424656
+        else:
+            k1 = -0.000812*current_velocity + 0.222785
+            k2 = -0.002167*current_velocity + 1.132221
 
         # Feedforward compensation
         steering_ff = abs(np.arctan(current_yaw_rate*self.wheel_base/current_velocity))
 
         # LQR with feedforward compensation
-        steering = (-k1*cte - k2*epsi + steering_ff)/self.steer_ratio
+        steering = (-k1*cte - k2*epsi + steering_ff)*self.steer_ratio
         steering_B4 = steering
 
         # Verify control within limits
@@ -67,7 +72,7 @@ class LateralLQR(object):
         rospy.logwarn("delta [rad]: {0}\n".format(steering))
         
         steering_list = []
-        for j in range(10):
+        for j in range(9):
             steering_list.append(steering)
 
         return steering_list
