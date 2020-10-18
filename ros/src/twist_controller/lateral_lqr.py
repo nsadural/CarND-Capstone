@@ -9,6 +9,9 @@ class LateralLQR(object):
         self.max_steer = max_steer_angle
         self.min_steer = -max_steer_angle
         self.steer_ratio = steer_ratio
+        
+        self.sample_time = 0.020
+        self.control_horizon = 9
 
     def get_steering(self, current_x, current_y, current_psi, current_velocity, current_yaw_rate, trajectory_x, trajectory_y, trajectory_psi):
         # Translate vehicle and trajectory points to trajectory frame
@@ -40,18 +43,17 @@ class LateralLQR(object):
         ### LQR gain schedule
         # Lower speeds
         if current_velocity < 15:
-            k1 = -0.000046*current_velocity + 0.031621
-            k2 = -0.000315*current_velocity + 0.424656
+            k1 = -0.000259*current_velocity + 0.099984
+            k2 = -0.000990*current_velocity + 0.754993
         else:
-            k1 = -0.000812*current_velocity + 0.222785
-            k2 = -0.002167*current_velocity + 1.132221
+            k1 = -0.001341*current_velocity + 0.314606
+            k2 = -0.003024*current_velocity + 1.344383
 
         # Feedforward compensation
-        steering_ff = abs(np.arctan(current_yaw_rate*self.wheel_base/current_velocity))
+        steering_ff = np.arctan(current_yaw_rate*self.wheel_base/current_velocity)
 
         # LQR with feedforward compensation
         steering = (-k1*cte - k2*epsi + steering_ff)*self.steer_ratio
-        steering_B4 = steering
 
         # Verify control within limits
         if steering > self.max_steer:
@@ -68,11 +70,26 @@ class LateralLQR(object):
         rospy.logwarn("trajectory_x[1]: {0}".format(trajectory_x[1]))
         rospy.logwarn("trajectory_y[1]: {0}".format(trajectory_y[1]))
         rospy.logwarn("steering_ff [rad]: {0}".format(steering_ff))
-        rospy.logwarn("delta_B4 [rad]: {0}".format(steering_B4))
         rospy.logwarn("delta [rad]: {0}\n".format(steering))
         
         steering_list = []
-        for j in range(9):
+        steering_list.append(steering)
+        for j in range(self.control_horizon-1):
+            steering, cte, epsi = self.propogate_error(cte, epsi, current_velocity, steering, steering_ff, k1, k2)
             steering_list.append(steering)
 
         return steering_list
+    
+    def propogate_error(self, cte, epsi, current_velocity, steering, steering_ff, k1, k2):
+        cte_next = epsi*current_velocity*self.sample_time
+        epsi_next = (current_velocity/self.wheel_base)*(steering - steering_ff)*self.sample_time
+        
+        steering_next = (-k1*cte_next - k2*epsi_next + steering_ff)*self.steer_ratio
+        
+        if steering_next > self.max_steer:
+            steering_next = self.max_steer
+        elif steering_next < self.min_steer:
+            steering_next = self.min_steer
+            
+        return steering_next, cte_next, epsi_next
+    
