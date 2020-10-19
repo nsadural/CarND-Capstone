@@ -48,7 +48,7 @@ class Controller(object):
         curren_vel = self.vel_lpf.filt(current_vel)
         
         if not self.steering_list:
-            self.steering_list = self.yaw_controller.get_steering(current_x, current_y, current_psi, curren_vel, angular_vel, trajectory_x, trajectory_y, trajectory_psi)
+            self.steering_list = self.yaw_controller.get_steering(current_x, current_y, current_psi, curren_vel, curr_ang_vel, trajectory_x, trajectory_y, trajectory_psi, linear_vel, angular_vel)
         
         steering = self.steering_list.pop(0)
         
