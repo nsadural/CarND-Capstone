@@ -11,7 +11,7 @@ class LateralLQR(object):
         self.steer_ratio = steer_ratio
         
         self.sample_time = 0.020
-        self.control_horizon = 5
+        self.control_horizon = 6
         self.n_rmse = 0
         self.running_cte = 0.0
         self.running_sq_cte = 0.0
@@ -53,16 +53,18 @@ class LateralLQR(object):
         self.mean_cte = self.running_cte/self.n_rmse
         self.rmse = np.sqrt(self.running_sq_cte/self.n_rmse)
         
-        rospy.logwarn("Mean crosstrack error [m]: {0}".format(self.mean_cte))
-        rospy.logwarn("Root mean square crosstrack error [m]: {0}\n".format(self.rmse))
+        rospy.logwarn("Mean crosstrack error [m]: {0}".format(round(self.mean_cte,3)))
+        rospy.logwarn("Root mean square crosstrack error [m]: {0}\n".format(round(self.rmse,3)))
 
         ### LQR gain schedule
-        k1 = -0.000077*current_velocity + 0.044710
-        k2 = -0.000441*current_velocity + 0.504839
+        #k1 = -0.000077*current_velocity + 0.044710
+        k1 = -0.000046*current_velocity + 0.031617
+        #k2 = -0.000441*current_velocity + 0.504839
+        k2 = -0.000313*current_velocity + 0.424524
 
         # Feedforward compensation
         steering_ff = np.arctan(des_yaw_rate*self.wheel_base/des_velocity)
-        k_ff = 1.2
+        k_ff = 1.3
         
         # LQR with feedforward compensation
         steering = (-k1*cte - k2*epsi + k_ff*steering_ff)*self.steer_ratio
