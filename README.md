@@ -1,12 +1,7 @@
 # Controls Simulation
 ## Nikko Sadural (nsadural@purdue.edu)
-[//]: # Video References
 
-[lateral_lqr]: ./res/lateral_lqr.mp4 "Lateral LQR"
-
-Since the team submission of the capstone project, I have been working on a closed-loop steering controller (lateral_lqr.py) that regulates lateral position and heading error as opposed to the previous open-loop yaw controller (yaw_controller.py) which uses turning kinematics, current velocity, desired velocity, and desired yaw rate to calculate a steering angle to maintain the turning radius of the trajectory. The LQR (linear quadratic regulator) approach uses a dynamic model for lateral and heading tracking error, which are functions of vehicle speed, wheelbase, and steering input. The Q and R weighted matrices were designed and tuned using the MATLAB lqrd() command. The designed full-state feedback controller is then implemented in lateral_lqr.py, with the addition of feedforward compensation dependent on desired turning radius from trajectory information. Trial and error of LQR weights and feedforward gain have led to the current controller design (still needing performance improvement) demonstrated in the sped-up video below (with traffic light detection off).
-
-![alt text][lateral_lqr]
+Since the team submission of the capstone project, I have been working on a closed-loop steering controller (lateral_lqr.py) that regulates lateral position and heading error as opposed to the previous open-loop yaw controller (yaw_controller.py) which uses turning kinematics, current velocity, desired velocity, and desired yaw rate to calculate a steering angle to maintain the turning radius of the trajectory. The LQR (linear quadratic regulator) approach uses a dynamic model for lateral and heading tracking error, which are functions of vehicle speed, wheelbase, and steering input. The Q and R weighted matrices were designed and tuned using the MATLAB lqrd() command. The designed full-state feedback controller is then implemented in lateral_lqr.py, with the addition of feedforward compensation dependent on desired turning radius from trajectory information. Trial and error of LQR weights and feedforward gain have led to the current controller design (still needing performance improvement) [demonstrated in this sped-up video](./res/lateral_lqr.mp4) (with traffic light detection off).
 
 # Programming a Real Self-Driving Car
 
